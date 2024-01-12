@@ -10,6 +10,11 @@ logger = logging.getLogger(__name__)
 rollup_server = environ["ROLLUP_HTTP_SERVER_URL"]
 logger.info(f"HTTP rollup_server url is {rollup_server}")
 
+# Maximum attempts before generating a new secret number
+MAX_ATTEMPTS = 5
+# Generate secret_number from one to 100
+secret_number = random.randint(1, 100)
+attempts = 0  # Counter for attempts
 
 def hex2str(hex):
     """
@@ -23,31 +28,44 @@ def str2hex(str):
     """
     return "0x" + str.encode("utf-8").hex()
 
-def guess_the_number(user_guess, secret_number):
+def guess_the_number(user_guess, secret_number, attempts):
     # Check if the guess is correct
     if user_guess == secret_number:
-        return "You Won"
+        return f"Congratulations 🏅🏅!! You Won in {attempts} attempts!, The correct number is '{secret_number}' GAME RESTARTED!!", True
     elif user_guess < secret_number:
-        return "Too low! Try again."
+        return f"low 😑😑!! Try again. Your guess: {user_guess}, Attempts: {attempts}", False
     else:
-        return "Too high! Try again."
+        return f"high 😲😲!! Try again. Your guess: {user_guess}, Attempts: {attempts}", False
 
 def handle_advance(data):
+    global secret_number
+    global attempts
+
     logger.info(f"Received advance request data {data}")
     status = "accept"
-
-    # Generate secret_number from one to 100
-    secret_number = random.randint(1, 100)
 
     try:
         user_guess = int(hex2str(data["payload"]))
         logger.info(f"Received input: {user_guess}")
 
+        # Increment attempts
+        attempts += 1
+
         # Evaluates expression
-        result = guess_the_number(user_guess, secret_number)
+        result, correct = guess_the_number(user_guess, secret_number, attempts)
+
+        if correct:
+            # If correct or reached max attempts, generate a new secret number
+            secret_number = random.randint(1, 100)
+            attempts = 0  # Reset attempts counter
+            
+        elif  attempts >= MAX_ATTEMPTS:
+            result = f"Oops ☹️☹️☹️!! Out of attempts! The correct number was {secret_number}. GAME RESTARTED!!"
+            secret_number = random.randint(1, 100)
+            attempts = 0
 
         # Emits notice with result
-        logger.info(f"Adding notice with payload: '{result}' The correct number was '{secret_number}'")
+        logger.info(f"Adding notice with payload: '{result}'")
         response = requests.post(rollup_server + "/notice", json={"payload": str2hex(str(result))})
         logger.info(f"Received notice status {response.status_code} body {response.content}")
 
