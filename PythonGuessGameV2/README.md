@@ -1,14 +1,15 @@
-# Guess Game dApp
+# Guess Game dApp V2
 
 This Guess Game dApp is built using [Sunodo](https://docs.sunodo.io/), a Cartesi "Rollups as a Service" platform. Sunodo provides a robust set of tools to streamline the development workflow of Cartesi applications. 
 
-It is written in Python and uses the Random library for generating random number. The dApp allows users to guess a secret number in 5 attempt before the secret number changes.
+It is written in Python and uses the Random library for generating random number. In this guess game v2, you challenge the computer to guess a secret number you've chosen between 1 and 100.
 
-A user have 5 trials to guess the number right, if after the 5 attempt, the user didn't get it right. The secret number get updated to a new number.
+The computer gets 5 attempts to uncover your number. After each guess, you provide feedback by indicating whether the guess was too high or too low.
 
-If a user's guess is lower than the secret number, The user gets notified
-If a user's guess is higher than the secret number, the user gets notified
-If the users guess is correct, the users get notified and the secret number gets updated to a new one.
+The computer uses this feedback to intelligently narrow its guessing range, making more strategic guesses as the game progresses.
+
+If the computer correctly guesses your number within the allotted attempts, it wins! If it runs out of attempts without success, you win!
+
 
 ## Requirements and Installation
 
@@ -58,7 +59,7 @@ sunodo build
 You should see a Cartesi Machine snapshot output similar to this:
 
 ```
-          .
+         .
         / \
       /    \
 \---/---\  /----\
@@ -72,13 +73,13 @@ You should see a Cartesi Machine snapshot output similar to this:
 [INFO  rollup_http_server::http_service] starting http dispatcher http service!
 [INFO  actix_server::builder] starting 1 workers
 [INFO  actix_server::server] Actix runtime found; starting in Actix runtime
-[INFO  rollup_http_server::dapp_process] starting dapp: python3 guessgame.py
+[INFO  rollup_http_server::dapp_process] starting dapp: python3 guessgameV2.py
 INFO:__main__:HTTP rollup_server url is http://127.0.0.1:5004
 INFO:__main__:Sending finish
 
 Manual yield rx-accepted (0x100000000 data)
-Cycles: 2736795957
-2736795957: 49d61461d0e4fd6f624910d50173b41c7e5ffecdf09c0426140f5e582dd162bf
+Cycles: 2736715067
+2736715067: d2d752baa5d82c632f5a4b931189439fb096b2675705fbd69bc5f22eae701caf
 Storing machine: please wait
 
 ```
@@ -131,13 +132,18 @@ For local testing, select `Foundry` which gives you mock and test faucets to sub
 ✔ Input sent: 0x6ff66ca05f6bae763fb05e610d5c66debb35c4127e8ccf27eb6fc8558246eb49
 ```
 
-It will check if the `user_guess == secret_number` and add the outcome `result` as a notice:
+It will check if the `computer_guess == user_number` and add the outcome `result` as a notice:
 
 ```
-INFO:__main__:Received finish status 200
-validator-1  | INFO:__main__:Received advance request data {'metadata': {'msg_sender': '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266', 'epoch_index': 0, 'input_index': 0, 'block_number': 29, 'timestamp': 1705054105}, 'payload': '0x3538'}
-validator-1  | INFO:__main__:Received input: 58
-validator-1  | INFO:__main__:Adding notice with payload: 'high 😲😲!! Try again. Your guess: 58, Attempts: 1'
+validator-1  | INFO:__main__:Received finish status 200
+validator-1  | INFO:__main__:Received advance request data {'metadata': {'msg_sender': '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266', 'epoch_index': 0, 'input_index': 0, 'block_number': 31, 'timestamp': 1705076471}, 'payload': '0x3238'}
+validator-1  | INFO:__main__:Computer guessed 19 (attempt 1), feedback: low
+validator-1  | INFO:__main__:Computer guessed 83 (attempt 2), feedback: high
+validator-1  | INFO:__main__:Computer guessed 59 (attempt 3), feedback: high
+validator-1  | INFO:__main__:Computer guessed 22 (attempt 4), feedback: low
+validator-1  | INFO:__main__:Computer guessed 36 (attempt 5), feedback: high
+validator-1  | INFO:__main__:Adding notice with payload: 'Computer ran out of attempts. The number was 28, You Won 🏅🏅!!'
+
 ```
 
-In this case the user guess is higher than the secret number
+In this case the computer didn't get the number

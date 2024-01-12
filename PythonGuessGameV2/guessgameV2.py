@@ -56,7 +56,7 @@ def handle_advance(data):
             feedback = guess_the_number(computer_guess, user_number, attempt)
 
             if feedback == "correct":
-                result = f"Computer guessed correctly in {attempt + 1} attempts! The number was {user_number}"
+                result = f"Computer guessed correctly in {attempt + 1} attempts! The number was {user_number}, You Lose ☹️☹️☹️!!"
                 logger.info(result)
                 break
             else:
@@ -74,7 +74,7 @@ def handle_advance(data):
                 computer_guess = random.randint(lower_bound, upper_bound) 
 
         else:
-            result = f"Computer ran out of attempts. The number was {user_number}"
+            result = f"Computer ran out of attempts. The number was {user_number}, You Won 🏅🏅!!"
             logger.info(f"Adding notice with payload: '{result}'")
             response = requests.post(rollup_server + "/notice", json={"payload": str2hex(str(result))})
             logger.info(f"Received notice status {response.status_code} body {response.content}")
